@@ -4,16 +4,36 @@ import numpy as np
 
 def tratarIdade(idade):
 
-    # considera apenas os 2 últimos dígitos se for um número de 4 dígitos
     if pd.notna(idade):
         try:
             idade_str = str(int(idade))  
             if len(idade_str) == 4:  
-                return int(idade_str[-2:])  
+                idade = int(idade_str[-2:])
+
+            if idade <= 14:
+                # jovem
+                return 0
+            elif 15 <= idade <= 64:
+                # adulto
+                return 1
+            elif idade >= 65:
+                # idoso
+                return 2
         except ValueError:
             pass
 
-    return idade  
+    return idade
+
+def tratarSexo(sexo):
+    if sexo == 'M':
+        # masculino
+        return 0  
+    elif sexo == 'F':
+        # feminino
+        return 1
+    else:
+        return 2
+    return sexo
 
 
 def filtroFeatures(input_csv, output_csv):
@@ -47,6 +67,11 @@ def filtroFeatures(input_csv, output_csv):
 
     # aplicar o tratamento na coluna 'NU_IDADE_N'
     df_filtered['NU_IDADE_N'] = df_filtered['NU_IDADE_N'].apply(tratarIdade)
+    df_filtered['CS_SEXO'] = df_filtered['CS_SEXO'].apply(tratarSexo)
+
+     # Mostrar valores únicos de CS_SEXO e suas quantidades
+    unique_sexo_values = df_filtered['CS_SEXO'].value_counts()
+    print(f"Valores únicos e quantidades em CS_SEXO:\n{unique_sexo_values}")
     
     # salvar o novo DataFrame filtrado em um novo arquivo CSV
     df_filtered.to_csv(output_csv, index=False)
