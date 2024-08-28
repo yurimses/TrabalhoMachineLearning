@@ -29,7 +29,9 @@ def filtroFeatures(input_csv, output_csv):
     df = pd.read_csv(input_csv, engine='python', encoding='ISO-8859-1', delimiter=';')
 
     # filtrar as instâncias onde SG_UF_NOT é igual a 15 (PARÁ)
-    df_filtered = df[df['SG_UF_NOT'] == 15]
+    # df_filtered = df[df['SG_UF_NOT'].isin([15, 11, 12, 13, 14, 16, 17])]
+
+    df_filtered = df
 
     # filtrar por não evoluiu a óbito
     df_filtered = df_filtered[df_filtered['EVOLUCAO'] == 1.0]
@@ -110,14 +112,13 @@ def agregarArquivos(output_folder, output_subfolder):
     return df_aggregated
 
 # pata de entrada com csv brutos
-input_folder = '/home/yuri/Downloads/dt_influ'
+input_folder = '/home/yuri/Desktop/Datasetp'
 
 # pasta de saída com cvs tratados
-output_folder = '/home/yuri/Downloads/dt_influ_test'  
+output_folder = '/home/yuri/Desktop/test'  
 processarArquivosNaPasta(input_folder, output_folder)
 
 # agrupar todos os csv em um só
 output_subfolder = 'CSV Agegrado'
 agregarArquivos(output_folder, output_subfolder)
-
 
