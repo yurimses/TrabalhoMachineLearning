@@ -42,7 +42,7 @@ def filtroFeatures(input_csv, output_csv):
     features = [
         'CS_SEXO', 'NU_IDADE_N', 'CS_RACA', 'CS_ESCOL_N', 'PUERPERA',
         'CARDIOPATI', 'SIND_DOWN', 'HEPATICA', 'NEUROLOGIC', 'PNEUMOPATI', 
-        'IMUNODEPRE', 'RENAL', 'OBESIDADE', 'OUT_MORBI', 'EVOLUCAO'
+        'IMUNODEPRE', 'RENAL', 'OBESIDADE', 'OUT_MORBI', 'EVOLUCAO', 'CLASSI_FIN'
     ]
     
     # ler o arquivo csv
@@ -55,6 +55,12 @@ def filtroFeatures(input_csv, output_csv):
 
     # filtrar por não evoluiu a óbito
     df_filtered = df_filtered[df_filtered['EVOLUCAO'] == 1.0]
+
+    # excluir instâncias onde OUT_MORBI é igual a 9
+    # df_filtered = df_filtered[df_filtered['OUT_MORBI'] != 9]
+
+    # excluir instâncias onde CLASSI_FIN é igual a 4
+    # df_filtered = df_filtered[df_filtered['CLASSI_FIN'] != 4]
     
     # filtrar as colunas desejadas no DataFrame já filtrado
     df_filtered = df_filtered[features]
@@ -69,7 +75,7 @@ def filtroFeatures(input_csv, output_csv):
     df_filtered['NU_IDADE_N'] = df_filtered['NU_IDADE_N'].apply(tratarIdade)
     df_filtered['CS_SEXO'] = df_filtered['CS_SEXO'].apply(tratarSexo)
 
-     # Mostrar valores únicos de CS_SEXO e suas quantidades
+    # Mostrar valores únicos de CS_SEXO e suas quantidades
     unique_sexo_values = df_filtered['CS_SEXO'].value_counts()
     print(f"Valores únicos e quantidades em CS_SEXO:\n{unique_sexo_values}")
     
