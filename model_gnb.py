@@ -5,7 +5,7 @@ from sklearn.metrics import accuracy_score
 
 '''
 referências para o código:
-https://scikit-learn.org/stable/modules/tree.html
+https://scikit-learn.org/stable/modules/generated/sklearn.naive_bayes.GaussianNB.html
 https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html
 
 
