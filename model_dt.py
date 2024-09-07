@@ -1,3 +1,6 @@
+# ARVORE DE DECISAO
+
+
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
@@ -10,13 +13,16 @@ https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_
 
 '''
 
-file_path = '/home/yuri/Desktop/test/CSV Agegrado/dados_agregados.csv'
+file_path = '/home/yuri/Desktop/Teste com MV-MODA/CSV Brasil/dados_agregadosBrasilY.csv'    # DADOS COM MISSING VALUES 
+# file_path = '/home/yuri/Desktop/Teste sem MV/CSV Brasil/dados_agregadosBrasilN.csv'       # DADOS SEM MISSING VALUES
+
 df = pd.read_csv(file_path)
 
+
 # seleçao dasffeatures e o target
-features = ['CS_SEXO', 'NU_IDADE_N', 'CS_RACA', 'CS_ESCOL_N', 'PUERPERA',
-            'CARDIOPATI', 'SIND_DOWN', 'HEPATICA', 'NEUROLOGIC', 'PNEUMOPATI',
-            'IMUNODEPRE', 'RENAL', 'OBESIDADE', 'OUT_MORBI']
+features = [
+        'CS_SEXO', 'NU_IDADE_N', 'CS_RACA', 'CS_ESCOL_N', 'CARDIOPATI', 'PNEUMOPATI', 'IMUNODEPRE', 'RENAL', 'OUT_MORBI', 'EVOLUCAO', 'CLASSI_FIN'
+    ]
 
 target = 'CLASSI_FIN'
 
@@ -25,7 +31,7 @@ X = df[features].values
 y = df[target].values
 
 # divide em treino e teste
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=27)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=27)
 
 # modelo arvore de decisao
 model_dt = DecisionTreeClassifier(random_state=27)

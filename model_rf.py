@@ -1,21 +1,20 @@
-# GAUSSIAN NAIVE BAYES
+# RANDOM FOREST
 
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
 '''
 referências para o código:
-https://scikit-learn.org/stable/modules/generated/sklearn.naive_bayes.GaussianNB.html
+https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html
 https://scikit-learn.org/stable/modules/generated/sklearn.model_selection.train_test_split.html
-
 
 '''
 
 file_path = '/home/yuri/Desktop/Teste com MV-MODA/CSV Brasil/dados_agregadosBrasilY.csv'    # DADOS COM MISSING VALUES 
-# file_path = '/home/yuri/Desktop/Teste sem MV/CSV Brasil/dados_agreadosBrasilN.csv'       # DADOS SEM MISSING VALUES
+# file_path = '/home/yuri/Desktop/Teste sem MV/CSV Brasil/dados_agregadosBrasilN.csv'       # DADOS SEM MISSING VALUES
 
 df = pd.read_csv(file_path)
 
@@ -33,14 +32,14 @@ y = df[target].values
 # divide em treino e teste
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=27)
 
-# modelo gnb
-model_gnb = GaussianNB()
+# modelo arvore de decisao
+model_dt = RandomForestClassifier(random_state=27)
 
 # treina o modelo
-model_gnb.fit(X_train, y_train)
+model_dt.fit(X_train, y_train)
 
 # faz a prediça~o usando conjunto de teste
-y_pred = model_gnb.predict(X_test)
+y_pred = model_dt.predict(X_test)
 
 # métrica acurácia
 accuracy = accuracy_score(y_test, y_pred)

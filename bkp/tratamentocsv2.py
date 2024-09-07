@@ -1,3 +1,6 @@
+''' Arquivo para fazer o tratamento dos csvs mas excluindo valores faltantes (missing values)'''
+
+
 import os
 import pandas as pd
 import numpy as np
@@ -27,12 +30,12 @@ def tratarIdade(idade):
 def tratarSexo(sexo):
     if sexo == 'M':
         # masculino
-        return 0  
+        return 1 
     elif sexo == 'F':
         # feminino
-        return 1
-    else:
         return 2
+    else:
+        return 9
     return sexo
 
 
@@ -75,10 +78,6 @@ def filtroFeatures(input_csv, output_csv):
     df_filtered['NU_IDADE_N'] = df_filtered['NU_IDADE_N'].apply(tratarIdade)
     df_filtered['CS_SEXO'] = df_filtered['CS_SEXO'].apply(tratarSexo)
 
-    # Mostrar valores únicos de CS_SEXO e suas quantidades
-    unique_sexo_values = df_filtered['CS_SEXO'].value_counts()
-    print(f"Valores únicos e quantidades em CS_SEXO:\n{unique_sexo_values}")
-    
     # salvar o novo DataFrame filtrado em um novo arquivo CSV
     df_filtered.to_csv(output_csv, index=False)
     
@@ -146,7 +145,7 @@ def agregarArquivos(output_folder, output_subfolder):
 input_folder = '/home/yuri/Desktop/Datasetp'
 
 # pasta de saída com cvs tratados
-output_folder = '/home/yuri/Desktop/test'  
+output_folder = '/home/yuri/Desktop/Teste sem MV'  
 processarArquivosNaPasta(input_folder, output_folder)
 
 # agrupar todos os csv em um só

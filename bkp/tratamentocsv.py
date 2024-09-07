@@ -1,8 +1,12 @@
+''' Arquivo para fazer o tratamento dos csvs mas excluindo valores faltantes (missing values)'''
+
+
 import os
 import pandas as pd
 import numpy as np
 
 def tratarIdade(idade):
+
     if pd.notna(idade):
         try:
             idade_str = str(int(idade))  
@@ -26,13 +30,14 @@ def tratarIdade(idade):
 def tratarSexo(sexo):
     if sexo == 'M':
         # masculino
-        return 0  
+        return 1 
     elif sexo == 'F':
         # feminino
-        return 1
-    else:
         return 2
+    else:
+        return 9
     return sexo
+
 
 def filtroFeatures(input_csv, output_csv):
 
@@ -67,7 +72,7 @@ def filtroFeatures(input_csv, output_csv):
     df_filtered.replace('', np.nan, inplace=True)
     
     # remover linhas com valores ausentes ou NaN
-    # df_filtered = df_filtered.dropna()
+    df_filtered = df_filtered.dropna()
 
     # aplicar o tratamento na coluna 'NU_IDADE_N'
     df_filtered['NU_IDADE_N'] = df_filtered['NU_IDADE_N'].apply(tratarIdade)
@@ -114,6 +119,12 @@ def agregarArquivos(output_folder, output_subfolder):
                 # lê cada arquivo CSV e adiciona o DataFrame à lista
                 df = pd.read_csv(file_path, engine='python', encoding='ISO-8859-1', delimiter=',')
 
+                # remover colunas vazias ou com todos os valores NA
+                df = df.dropna(axis=1, how='all')
+
+                # remover linhas com valores ausentes
+                df = df.dropna()
+
                 dfs.append(df)
                 print(f"Adicionado: {filename}")
             except Exception as e:
@@ -122,36 +133,22 @@ def agregarArquivos(output_folder, output_subfolder):
     # junta todos os DataFrames em um único DataFrame
     df_aggregated = pd.concat(dfs, ignore_index=True)
 
-    # embaralhar as linhas
-    df_aggregated = df_aggregated.sample(frac=1, random_state=27).reset_index(drop=True)
-
-    # calcula o tamanho de cada parte
-    part_size = len(df_aggregated) // 10
-
-    # salvar em partes
-    for i in range(10):
-        start_idx = i * part_size
-        if i == 9:  # para a última parte, incluir todas as linhas restantes
-            df_part = df_aggregated[start_idx:]
-        else:
-            df_part = df_aggregated[start_idx:start_idx + part_size]
-
-        # define o caminho para cada arquivo de parte
-        part_file = os.path.join(full_output_folder, f'dados_parte_{i+1}.csv')
-        
-        # salva o DataFrame da parte em um novo arquivo CSV
-        df_part.to_csv(part_file, index=False)
-        print(f'Salvo: {part_file}')
+    # define o caminho para o arquivo agregado
+    output_file = os.path.join(full_output_folder, 'dados_agregados.csv')
+    
+    # salva o DataFrame agregado em um novo arquivo CSV
+    df_aggregated.to_csv(output_file, index=False)
 
     return df_aggregated
 
-# pasta de entrada com csv brutos
+# pata de entrada com csv brutos
 input_folder = '/home/yuri/Desktop/Datasetp'
 
-# pasta de sadía com csvs tratados
-output_folder = '/home/yuri/Desktop/test'  
+# pasta de saída com cvs tratados
+output_folder = '/home/yuri/Desktop/Teste sem MV'  
 processarArquivosNaPasta(input_folder, output_folder)
 
-# agrupa todos os csv em um só, dividindo em 10 partes iguais
+# agrupar todos os csv em um só
 output_subfolder = 'CSV Agegrado'
 agregarArquivos(output_folder, output_subfolder)
+
