@@ -4,7 +4,7 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.svm import LinearSVC
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, recall_score
 
 '''
 referências para o código:
@@ -50,3 +50,7 @@ y_pred = model_linear_svc.predict(X_test)
 # métrica acurácia
 accuracy = accuracy_score(y_test, y_pred)
 print(f'Acurácia do modelo: {accuracy * 100:.2f}%')
+
+# métrica recall
+recall = recall_score(y_test, y_pred, average='weighted') 
+print(f'Recall do modelo: {recall * 100:.2f}%')
