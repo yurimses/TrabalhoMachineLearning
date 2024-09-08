@@ -93,47 +93,6 @@ def filtroFeaturesChunk(input_csv, output_csv, chunk_size=10000):
 
     print(f"Arquivo filtrado salvo em {output_csv}")
 
-def agregarArquivosPorAno(output_folder, chunk_size=10000):
-    # cria das pastas para os intervalos de anos
-    folder_2009_2019 = os.path.join(output_folder, 'CSV_2009_2019')
-    folder_2020_2024 = os.path.join(output_folder, 'CSV_2020_2024')
-    
-    for folder in [folder_2009_2019, folder_2020_2024]:
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-    
-    dfs_2009_2019 = []
-    dfs_2020_2024 = []
-
-    for filename in os.listdir(output_folder):
-        if filename.endswith("_filtrado.csv"):
-            file_path = os.path.join(output_folder, filename)
-            try:
-                for chunk in pd.read_csv(file_path, chunksize=chunk_size, engine='python', encoding='ISO-8859-1', delimiter=','):
-                    # Divisão com base no ano
-                    if 2009 <= chunk['Ano'].iloc[0] <= 2019:
-                        dfs_2009_2019.append(chunk)
-                        print(f"Adicionado ao grupo 2009-2019: {filename} - Chunk de tamanho {len(chunk)}")
-                    elif 2020 <= chunk['Ano'].iloc[0] <= 2024:
-                        dfs_2020_2024.append(chunk)
-                        print(f"Adicionado ao grupo 2020-2024: {filename} - Chunk de tamanho {len(chunk)}")
-            except Exception as e:
-                print(f"Erro ao agregar {filename}: {e}")
-
-    # aalva os agregados para 2009-2019
-    if dfs_2009_2019:
-        df_aggregated_2009_2019 = pd.concat(dfs_2009_2019, ignore_index=True)
-        output_file_2009_2019 = os.path.join(folder_2009_2019, 'dados_agregados_2009_2019.csv')
-        df_aggregated_2009_2019.to_csv(output_file_2009_2019, index=False)
-        print(f"Arquivo agregado 2009-2019 salvo em {output_file_2009_2019}")
-    
-    # salva os agregados para 2020-2024
-    if dfs_2020_2024:
-        df_aggregated_2020_2024 = pd.concat(dfs_2020_2024, ignore_index=True)
-        output_file_2020_2024 = os.path.join(folder_2020_2024, 'dados_agregados_2020_2024.csv')
-        df_aggregated_2020_2024.to_csv(output_file_2020_2024, index=False)
-        print(f"Arquivo agregado 2020-2024 salvo em {output_file_2020_2024}")
-
 def agregarArquivosChunk(output_folder, output_subfolder, chunk_size=10000):
     full_output_folder = os.path.join(output_folder, output_subfolder)
     if not os.path.exists(full_output_folder):
@@ -185,6 +144,3 @@ processarArquivosNaPasta(input_folder, output_folder, chunk_size=10000)
 # Agrupar todos os CSV em um só
 output_subfolder = 'CSV Brasil'
 agregarArquivosChunk(output_folder, output_subfolder, chunk_size=10000)
-
-# Agrupar os arquivos por intervalo de ano
-agregarArquivosPorAno(output_folder, chunk_size=10000)

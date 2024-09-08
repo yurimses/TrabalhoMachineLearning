@@ -45,6 +45,12 @@ def tratarClassi(classi, ano):
             return 4
     return classi
 
+def preencher_missing_values(df):
+    for column in df.columns:
+        moda = df[column].mode()[0]  # Calcula a moda da coluna
+        df[column] = df[column].fillna(moda)  # Preenche os valores ausentes com a moda
+    return df
+
 def filtroFeaturesChunk(input_csv, output_csv, chunk_size=10000):
     features = [
         'CS_SEXO', 'NU_IDADE_N', 'CS_RACA', 'CS_ESCOL_N', 'CARDIOPATI', 'PNEUMOPATI', 
@@ -53,86 +59,40 @@ def filtroFeaturesChunk(input_csv, output_csv, chunk_size=10000):
     
     first_chunk = True
     
-    # Determinar o ano a partir do nome do arquivo
-    ano_str = os.path.basename(input_csv)[-6:-4]  # Extrai os últimos dois caracteres antes da extensão
-    ano = 2000 + int(ano_str)  # Converte para ano completo
+    ano_str = os.path.basename(input_csv)[-6:-4] 
+    ano = 2000 + int(ano_str)
 
     for chunk in pd.read_csv(input_csv, chunksize=chunk_size, engine='python', encoding='ISO-8859-1', delimiter=';'):
-        # Filtrar por não evoluiu a óbito
-        chunk = chunk[chunk['EVOLUCAO'] == 1.0]
-
+        chunk = chunk[chunk['EVOLUCAO'] == 1.0]  # Filtrar por não evoluiu a óbito
+        
         # Adicionar a coluna do ano
         chunk['Ano'] = ano
 
         # Filtrar as colunas desejadas
         chunk = chunk[features + ['Ano']]
-
-        # Substituir strings vazias por NaN
-        chunk.replace('', np.nan, inplace=True)
         
-        # Remover linhas com valores ausentes ou NaN
-        chunk = chunk.dropna()
-
+        chunk.replace('', np.nan, inplace=True)  # Substituir strings vazias por NaN
+        
         # Aplicar o tratamento nas colunas
         chunk['NU_IDADE_N'] = chunk['NU_IDADE_N'].apply(tratarIdade)
         chunk['CS_SEXO'] = chunk['CS_SEXO'].apply(tratarSexo)
         
-        # Aplicar o tratamento de escolaridade, considerando o ano
         if 'CS_ESCOL_N' in chunk.columns:
             chunk['CS_ESCOL_N'] = chunk['CS_ESCOL_N'].apply(lambda x: tratarEscola(x, ano))
         
-        # Aplicar o tratamento de classi, considerando o ano
         if 'CLASSI_FIN' in chunk.columns:
             chunk['CLASSI_FIN'] = chunk['CLASSI_FIN'].apply(lambda x: tratarClassi(x, ano))
 
+        # Preencher valores ausentes com a moda de cada coluna
+        chunk = preencher_missing_values(chunk)
+
         # Salvar o DataFrame filtrado em um arquivo CSV
         chunk.to_csv(output_csv, mode='a', header=first_chunk, index=False)
-        first_chunk = False  # Após o primeiro chunk, não precisa escrever o cabeçalho novamente
+        first_chunk = False
 
         print(f"Processado chunk de tamanho {len(chunk)}")
 
     print(f"Arquivo filtrado salvo em {output_csv}")
-
-def agregarArquivosPorAno(output_folder, chunk_size=10000):
-    # cria das pastas para os intervalos de anos
-    folder_2009_2019 = os.path.join(output_folder, 'CSV_2009_2019')
-    folder_2020_2024 = os.path.join(output_folder, 'CSV_2020_2024')
-    
-    for folder in [folder_2009_2019, folder_2020_2024]:
-        if not os.path.exists(folder):
-            os.makedirs(folder)
-    
-    dfs_2009_2019 = []
-    dfs_2020_2024 = []
-
-    for filename in os.listdir(output_folder):
-        if filename.endswith("_filtrado.csv"):
-            file_path = os.path.join(output_folder, filename)
-            try:
-                for chunk in pd.read_csv(file_path, chunksize=chunk_size, engine='python', encoding='ISO-8859-1', delimiter=','):
-                    # Divisão com base no ano
-                    if 2009 <= chunk['Ano'].iloc[0] <= 2019:
-                        dfs_2009_2019.append(chunk)
-                        print(f"Adicionado ao grupo 2009-2019: {filename} - Chunk de tamanho {len(chunk)}")
-                    elif 2020 <= chunk['Ano'].iloc[0] <= 2024:
-                        dfs_2020_2024.append(chunk)
-                        print(f"Adicionado ao grupo 2020-2024: {filename} - Chunk de tamanho {len(chunk)}")
-            except Exception as e:
-                print(f"Erro ao agregar {filename}: {e}")
-
-    # aalva os agregados para 2009-2019
-    if dfs_2009_2019:
-        df_aggregated_2009_2019 = pd.concat(dfs_2009_2019, ignore_index=True)
-        output_file_2009_2019 = os.path.join(folder_2009_2019, 'dados_agregados_2009_2019.csv')
-        df_aggregated_2009_2019.to_csv(output_file_2009_2019, index=False)
-        print(f"Arquivo agregado 2009-2019 salvo em {output_file_2009_2019}")
-    
-    # salva os agregados para 2020-2024
-    if dfs_2020_2024:
-        df_aggregated_2020_2024 = pd.concat(dfs_2020_2024, ignore_index=True)
-        output_file_2020_2024 = os.path.join(folder_2020_2024, 'dados_agregados_2020_2024.csv')
-        df_aggregated_2020_2024.to_csv(output_file_2020_2024, index=False)
-        print(f"Arquivo agregado 2020-2024 salvo em {output_file_2020_2024}")
 
 def agregarArquivosChunk(output_folder, output_subfolder, chunk_size=10000):
     full_output_folder = os.path.join(output_folder, output_subfolder)
@@ -153,7 +113,7 @@ def agregarArquivosChunk(output_folder, output_subfolder, chunk_size=10000):
 
     if dfs:
         df_aggregated = pd.concat(dfs, ignore_index=True)
-        output_file = os.path.join(full_output_folder, 'dados_agregadosBrasilN.csv')
+        output_file = os.path.join(full_output_folder, 'dados_agregadosBrasilY.csv')
         df_aggregated.to_csv(output_file, index=False)
         print(f"Arquivo agregado salvo em {output_file}")
     else:
@@ -177,7 +137,7 @@ def processarArquivosNaPasta(input_folder, output_folder, chunk_size=10000):
 input_folder = '/home/yuri/Desktop/Datasetp'
 
 # Pasta de saída com CSV tratados
-output_folder = '/home/yuri/Desktop/Teste sem MV'  
+output_folder = '/home/yuri/Desktop/Teste com MV-MODA'  
 
 # Processar arquivos na pasta
 processarArquivosNaPasta(input_folder, output_folder, chunk_size=10000)
@@ -185,6 +145,3 @@ processarArquivosNaPasta(input_folder, output_folder, chunk_size=10000)
 # Agrupar todos os CSV em um só
 output_subfolder = 'CSV Brasil'
 agregarArquivosChunk(output_folder, output_subfolder, chunk_size=10000)
-
-# Agrupar os arquivos por intervalo de ano
-agregarArquivosPorAno(output_folder, chunk_size=10000)
